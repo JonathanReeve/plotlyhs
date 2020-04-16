@@ -206,6 +206,20 @@ instance ToJSON HoverInfo where
   toJSON (HoverPlus elems) = toJSON . intercalate "+" $ (map toLower . dropInitial "Hover" . show) <$> elems
   toJSON x                 = toJSON . map toLower . dropInitial "Hover" $ show x
 
+data HoverMode = X | Y | Closest | False | XUnified | YUnified
+
+instance ToJSON HoverMode where
+  toJSON mode = toJSON ( showMode mode ) where
+   showMode :: HoverMode -> Value
+   showMode m = case m of
+     X -> "x" 
+     Y -> "y"
+     Closest -> "closest"
+     Graphics.Plotly.Base.False -> "False"
+     XUnified -> "x unified"
+     YUnified -> "y unified"
+
+
 data HoverOn = HoverPoints | HoverFills deriving (Generic, Show)
 
 instance {-# OVERLAPS #-} ToJSON [HoverOn] where
@@ -240,12 +254,15 @@ data Trace = Trace
   , _visible :: Maybe Value
   , _traceshowlegend :: Maybe Bool
   , _legendgroup :: Maybe Text
-  , _stackgroup :: Maybe Text -- for making stacked line charts
   , _customdata :: Maybe [Value]
   , _hoverinfo :: Maybe HoverInfo
   , _hovertext :: Maybe (ListOrElem Text)
   , _hoveron :: Maybe [HoverOn]
   , _connectgaps :: Maybe Bool
+
+  -- Stacked Area Charts
+  , _stackgroup :: Maybe Text
+  , _fillcolor :: Maybe Text
 
   -- Pie
   , _sort :: Maybe Bool
@@ -264,8 +281,11 @@ data Trace = Trace
 
 makeLenses ''Trace
 
+-- mkTrace :: TraceType -> Trace
+-- mkTrace tt = Trace Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing tt Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
+
 mkTrace :: TraceType -> Trace
-mkTrace tt = Trace Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing tt Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
+mkTrace tt = Trace { _tracetype = tt }
 
 -- |an empty scatter plot
 scatter :: Trace
@@ -419,6 +439,7 @@ data Layout = Layout
   , _height :: Maybe Int
   , _width :: Maybe Int
   , _barmode :: Maybe Barmode
+  , _hovermode :: Maybe HoverMode
   , _margin :: Maybe Margin
   , _font :: Maybe Font
   , _annotations :: Maybe [Annotation]
@@ -426,9 +447,9 @@ data Layout = Layout
 
 makeLenses ''Layout
 
--- |a defaultlayout
+-- -- |a defaultlayout
 defLayout :: Layout
-defLayout = Layout Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
+defLayout = Layout Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
 
 instance ToJSON Layout where
   toJSON = genericToJSON jsonOptions
