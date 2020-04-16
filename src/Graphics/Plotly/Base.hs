@@ -281,11 +281,12 @@ data Trace = Trace
 
 makeLenses ''Trace
 
--- mkTrace :: TraceType -> Trace
--- mkTrace tt = Trace Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing tt Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
-
 mkTrace :: TraceType -> Trace
-mkTrace tt = Trace { _tracetype = tt }
+mkTrace tt = Trace Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing tt Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
+
+-- TODO: there must be a way to avoid all that nothing. Something like this?
+-- mkTrace :: TraceType -> Trace
+-- mkTrace tt = Trace { _tracetype = tt 
 
 -- |an empty scatter plot
 scatter :: Trace
